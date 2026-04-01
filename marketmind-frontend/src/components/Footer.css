@@ -1,0 +1,123 @@
+.footer {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95),
+    rgba(0, 0, 0, 0.85)
+  );
+  padding: 80px 40px 40px;
+  color: #e5e7eb;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: auto;
+
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+
+/* ================= BRAND ================= */
+.footer-brand img {
+  width: 140px;
+  margin-bottom: 16px;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #9ca3af;
+}
+
+/* ================= COLUMNS ================= */
+.footer-column h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+
+/* Base footer links */
+.footer-column a {
+  display: block;
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+  cursor: pointer;
+  text-decoration: none;
+
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+/* Hover animation */
+.footer-column a:hover {
+  color: #22c55e;
+  transform: translateX(6px);
+  opacity: 1;
+}
+
+/* ================= ACTIVE LINK (Features / AI Analyse) ================= */
+.footer-link.active {
+  color: #22c55e;
+  font-weight: 600;
+  transform: translateX(6px);
+}
+
+/* ================= DIVIDER ================= */
+.footer-divider {
+  margin: 48px auto 24px;
+  max-width: 1200px;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+}
+
+/* ================= BOTTOM ================= */
+.footer-bottom {
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.footer-bottom p {
+  margin: 6px 0;
+}
+
+.risk-text {
+  color: #6b7280;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 500px) {
+  .footer {
+    padding: 60px 20px 30px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .footer-column a:hover {
+    transform: translateY(-2px);
+  }
+
+  .footer-brand img {
+    margin: auto;
+  }
+}

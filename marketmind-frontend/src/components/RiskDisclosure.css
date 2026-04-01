@@ -1,0 +1,116 @@
+/* ================= RISK DISCLOSURE ================= */
+
+.risk-section {
+  background: radial-gradient(circle at top, #0b1220, #05080f);
+  padding: 120px 20px;
+  font-family: "Inter", system-ui, -apple-system;
+}
+
+.risk-container {
+  max-width: 980px;
+  margin: auto;
+}
+
+/* ================= TITLE ================= */
+
+.risk-title {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.risk-updated {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 90px;
+  font-size: 0.95rem;
+}
+
+/* ================= AI CARD ================= */
+
+.risk-block {
+  position: relative;
+  margin-bottom: 46px;
+  padding: 34px 38px;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.55);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* ================= CURSOR LIGHT ================= */
+
+.risk-block::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(0, 255, 136, 0.25),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+/* ================= HOVER ================= */
+
+.risk-block:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.7),
+    0 0 45px rgba(0, 255, 136, 0.25);
+}
+
+.risk-block:hover::before {
+  opacity: 1;
+}
+
+/* ================= TEXT ================= */
+
+.risk-block h3 {
+  color: #00ff88;
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.risk-block p {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.95;
+  font-size: 1.05rem;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .risk-title {
+    font-size: 2.3rem;
+  }
+
+  .risk-block {
+    padding: 26px 22px;
+    border-radius: 14px;
+  }
+
+  .risk-block h3 {
+    font-size: 1.15rem;
+  }
+
+  .risk-block p {
+    font-size: 0.95rem;
+  }
+}

@@ -1,0 +1,373 @@
+/* ======================================================
+   PAGE BACKGROUND + GLASS (VIDEO BASED)
+====================================================== */
+.auth-split-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #020617;
+  font-family: "Inter", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ======================================================
+   BACKGROUND VIDEO
+====================================================== */
+.auth-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  filter: blur(22px) brightness(0.55);
+  transform: scale(1.1);
+
+  z-index: 0;
+}
+
+/* ======================================================
+   GLASS OVERLAY ABOVE VIDEO
+====================================================== */
+.auth-split-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255, 255, 255, 0.05),
+      transparent 40%
+    ),
+    rgba(2, 6, 23, 0.65);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  z-index: 1;
+}
+
+/* ======================================================
+   BACK BUTTON
+====================================================== */
+.auth-back-btn {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  z-index: 5;
+
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  color: #22c55e;
+
+  padding: 10px 18px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.auth-back-btn:hover {
+  background: rgba(34, 197, 94, 0.15);
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.6);
+  transform: translateX(-3px);
+}
+
+/* ======================================================
+   MAIN CARD
+====================================================== */
+.auth-split-card {
+  position: relative;
+  z-index: 2;
+  width: 920px;
+  max-width: 95%;
+  height: 460px;
+  border-radius: 22px;
+  overflow: hidden;
+
+  border: 1px solid rgba(34, 197, 94, 0.6);
+
+  transition:
+    background 0.9s ease-in-out,
+    box-shadow 0.9s ease-in-out;
+
+  box-shadow:
+    0 0 38px rgba(34, 197, 94, 0.65),
+    inset 0 0 22px rgba(34, 197, 94, 0.2);
+}
+
+/* ======================================================
+   MODE COLORS
+====================================================== */
+.auth-split-card.login-mode {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.6),
+    rgba(10, 10, 10, 0.95)
+  );
+}
+
+.auth-split-card.signup-mode {
+  background: linear-gradient(
+    315deg,
+    rgba(34, 197, 94, 0.6),
+    rgba(10, 10, 10, 0.95)
+  );
+}
+
+/* ======================================================
+   WELCOME PANEL
+====================================================== */
+.welcome-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 70px;
+  z-index: 3;
+  color: #fff;
+
+  pointer-events: none;
+
+  transition:
+    justify-content 0.9s ease-in-out,
+    padding 0.9s ease-in-out,
+    box-shadow 0.9s ease-in-out;
+}
+
+.welcome-panel h2 {
+  pointer-events: auto;
+  font-size: 38px;
+  font-weight: 700;
+  max-width: 300px;
+  line-height: 1.15;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(34, 197, 94, 0.4);
+
+  transition:
+    transform 0.9s ease-in-out,
+    opacity 0.6s ease-in-out;
+}
+
+/* Login */
+.auth-split-card.login-mode .welcome-panel {
+  justify-content: flex-start;
+  box-shadow: inset -35px 0 55px rgba(0, 0, 0, 0.55);
+}
+
+.auth-split-card.login-mode .welcome-panel h2 {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Signup */
+.auth-split-card.signup-mode .welcome-panel {
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 110px;
+  box-shadow: inset 35px 0 55px rgba(0, 0, 0, 0.55);
+}
+
+.auth-split-card.signup-mode .welcome-panel h2 {
+  text-align: right;
+  transform: translateX(-8px);
+  opacity: 1;
+}
+
+/* ======================================================
+   FORM PANEL
+====================================================== */
+.form-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 55%;
+  padding: 56px 56px 56px 120px;
+  z-index: 2;
+  color: #fff;
+
+  transition:
+    left 0.9s ease-in-out,
+    right 0.9s ease-in-out,
+    padding 0.9s ease-in-out;
+}
+
+.auth-split-card.signup-mode .form-panel {
+  right: auto;
+  left: 0;
+  padding: 56px 120px 56px 56px;
+}
+
+/* ======================================================
+   DIAGONAL BLACK PANEL
+====================================================== */
+.form-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.97);
+  backdrop-filter: blur(6px);
+  z-index: -1;
+
+  transition:
+    clip-path 0.9s ease-in-out,
+    box-shadow 0.9s ease-in-out;
+}
+
+/* Login diagonal */
+.auth-split-card.login-mode .form-panel::before {
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 6% 100%);
+  box-shadow: -30px 0 55px rgba(34, 197, 94, 0.55);
+}
+
+/* Signup diagonal */
+.auth-split-card.signup-mode .form-panel::before {
+  clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+  box-shadow: 30px 0 55px rgba(34, 197, 94, 0.55);
+}
+
+/* ======================================================
+   FORM HEADER
+====================================================== */
+.form-panel h3 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+/* ======================================================
+   FORM
+====================================================== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* INPUT GROUP */
+.input-group {
+  position: relative;
+}
+
+.input-group input {
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 14px;
+  padding-right: 38px;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-bottom-color: #22c55e;
+}
+
+/* ICON */
+.input-icon {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.input-icon.clickable {
+  cursor: pointer;
+}
+
+/* ======================================================
+   BUTTON
+====================================================== */
+.auth-btn {
+  margin-top: 22px;
+  height: 48px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  box-shadow:
+    0 0 22px rgba(34, 197, 94, 0.85),
+    0 0 40px rgba(34, 197, 94, 0.45);
+}
+
+/* ======================================================
+   STATUS MESSAGES
+====================================================== */
+.auth-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.auth-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* ======================================================
+   SWITCH TEXT
+====================================================== */
+.auth-switch {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.auth-switch span {
+  color: #22c55e;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ======================================================
+   MOBILE SAFE
+====================================================== */
+@media (max-width: 900px) {
+  .auth-split-card {
+    height: auto;
+  }
+
+  .welcome-panel {
+    display: none;
+  }
+
+  .form-panel {
+    position: relative;
+    width: 100%;
+    padding: 40px;
+    left: auto;
+    right: auto;
+  }
+
+  .form-panel::before {
+    clip-path: none;
+    box-shadow: none;
+  }
+}

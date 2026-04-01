@@ -1,0 +1,122 @@
+.market-sentiment-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 100px 16px;
+  color: #e5e7eb;
+  position: relative;
+}
+
+.market-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.market-header h2 {
+  font-size: 34px;
+  color: #ecfdf5;
+}
+
+.preview-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin-top: 8px;
+  margin-bottom: 40px;
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+/* ================= CHART ================= */
+
+.sentiment-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sentiment-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sentiment-row span {
+  width: 80px;
+  color: #9ca3af;
+}
+
+.sentiment-row strong {
+  width: 40px;
+  text-align: right;
+}
+
+.bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.fill.bullish {
+  background: #22c55e;
+}
+
+.fill.neutral {
+  background: #9ca3af;
+}
+
+.fill.bearish {
+  background: #ef4444;
+}
+
+/* ================= PREVIEW MODE ================= */
+
+.blurred {
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(11, 15, 13, 0.75);
+  border-radius: 12px;
+}
+
+.preview-overlay p {
+  font-size: 16px;
+  color: #d1fae5;
+  margin-bottom: 18px;
+}
+
+.unlock-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #22c55e;
+  color: #052e16;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.unlock-btn:hover {
+  background: #16a34a;
+}

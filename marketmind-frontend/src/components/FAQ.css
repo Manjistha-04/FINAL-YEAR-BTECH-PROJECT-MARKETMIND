@@ -1,0 +1,118 @@
+/* ================= FAQ SECTION ================= */
+.faq-section {
+  position: relative;
+  padding: 110px 20px;
+  background: radial-gradient(circle at top, #0b1220, #05080f);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.faq-section.faq-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================= OPTIMIZED BACK GLOW (NO ANIMATION) ================= */
+.faq-particles {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.12), transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(0,255,136,0.1), transparent 45%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ================= CONTAINER ================= */
+.faq-container {
+  max-width: 900px;
+  margin: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.faq-title {
+  text-align: center;
+  font-size: 2.4rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.faq-subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 50px;
+}
+
+/* ================= FAQ LIST ================= */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ================= GLASS CARD (LIGHTWEIGHT) ================= */
+.faq-item {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 22px 26px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.faq-item:hover {
+  border-color: rgba(0,255,136,0.5);
+  box-shadow: 0 0 18px rgba(0,255,136,0.18);
+  transform: translateY(-2px);
+}
+
+/* Active state synced with AI Insights */
+.faq-item.active {
+  border-color: rgba(0,255,136,0.75);
+  box-shadow: 0 0 22px rgba(0,255,136,0.25);
+}
+
+/* ================= QUESTION ================= */
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.faq-icon {
+  font-size: 1.6rem;
+  color: #00ff88;
+  transition: transform 0.25s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
+}
+
+/* ================= ANSWER (SMOOTH & FAST) ================= */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 200px;
+  margin-top: 14px;
+  opacity: 1;
+}
+
+.faq-answer p {
+  color: rgba(255,255,255,0.75);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}

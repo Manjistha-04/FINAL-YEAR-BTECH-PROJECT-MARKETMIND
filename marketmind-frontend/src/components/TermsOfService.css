@@ -1,0 +1,178 @@
+/* ================= TERMS OF SERVICE ================= */
+
+.terms-section {
+  background: radial-gradient(circle at top, #0b1220, #05080f);
+  padding: 110px 20px;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.terms-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* ================= TITLE ================= */
+
+.terms-title {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.terms-updated {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 70px;
+  font-size: 0.95rem;
+}
+
+/* ================= GLASS BLOCK ================= */
+
+.terms-block {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 38px;
+  padding: 26px 28px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  animation: fadeUp 0.6s ease forwards;
+  transition: transform 0.35s ease, border-color 0.35s ease;
+}
+
+/* ================= MOVING GLOW LAYER ================= */
+
+.terms-block::before,
+.terms-block::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Front glow → LEFT to RIGHT */
+.terms-block::before {
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(0, 255, 136, 0.35),
+    transparent 70%
+  );
+  background-size: 200% 100%;
+}
+
+/* Back glow → RIGHT to LEFT */
+.terms-block::after {
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(0, 255, 136, 0.18),
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  filter: blur(14px);
+}
+
+/* ================= HOVER STATE ================= */
+
+.terms-block:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 255, 136, 0.4);
+}
+
+.terms-block:hover::before {
+  opacity: 1;
+  animation: glowForward 1.4s linear infinite;
+}
+
+.terms-block:hover::after {
+  opacity: 1;
+  animation: glowBackward 2s linear infinite;
+}
+
+/* ================= GLOW ANIMATIONS ================= */
+
+@keyframes glowForward {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes glowBackward {
+  from {
+    background-position: 200% 50%;
+  }
+  to {
+    background-position: 0% 50%;
+  }
+}
+
+/* ================= TEXT ================= */
+
+.terms-block h3 {
+  color: #00ff88;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.terms-block p {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.85;
+  font-size: 1rem;
+}
+
+.terms-block li {
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 10px;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= ACCESSIBILITY ================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .terms-block::before,
+  .terms-block::after {
+    animation: none;
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .terms-title {
+    font-size: 2.2rem;
+  }
+
+  .terms-block {
+    padding: 22px;
+  }
+}

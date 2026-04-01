@@ -1,0 +1,81 @@
+/* =====================================
+   MarketMind – AI Sentiment Insights
+===================================== */
+
+.sentiment-pills {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  z-index: 20;
+}
+
+/* Individual sentiment pill */
+.pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  background: rgba(2, 6, 23, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+
+  color: #ffffff;
+
+  animation: fadeInUp 0.35s ease;
+}
+
+/* Label (Market / IT / Banking) */
+.pill-label {
+  color: #cbd5f5;
+  margin-right: 6px;
+}
+
+/* Value (Bullish / Neutral / Bearish) */
+.pill-value {
+  font-weight: 700;
+}
+
+/* Sentiment colors */
+.positive {
+  color: #22c55e;
+}
+
+.neutral {
+  color: #eab308;
+}
+
+.negative {
+  color: #ef4444;
+}
+
+/* Entrance animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================
+   Responsive (Mobile Friendly)
+===================================== */
+@media (max-width: 768px) {
+  .sentiment-pills {
+    gap: 10px;
+  }
+
+  .pill {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}

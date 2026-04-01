@@ -1,0 +1,150 @@
+/* ================= PRIVACY POLICY ================= */
+
+.privacy-section {
+  background: radial-gradient(circle at top, #0b1220, #05080f);
+  padding: 110px 20px;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system,
+    BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.privacy-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* ================= TITLE ================= */
+
+.privacy-title {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.privacy-updated {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 70px;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+/* ================= GLASS CARD ================= */
+
+.privacy-block {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 38px;
+  padding: 26px 28px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* ================= SHINE SWEEP GLOW ================= */
+
+.privacy-block::before {
+  content: "";
+  position: absolute;
+  top: -120%;
+  left: -120%;
+  width: 240%;
+  height: 240%;
+
+  background: linear-gradient(
+    120deg,
+    transparent 40%,
+    rgba(0, 255, 136, 0.55),
+    transparent 60%
+  );
+
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ================= HOVER EFFECT ================= */
+
+.privacy-block:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 255, 136, 0.45);
+  box-shadow:
+    0 0 30px rgba(0, 255, 136, 0.25),
+    0 0 60px rgba(0, 255, 136, 0.15);
+}
+
+.privacy-block:hover::before {
+  opacity: 1;
+  animation: shineSweep 1.6s ease-out;
+}
+
+/* ================= SHINE ANIMATION ================= */
+
+@keyframes shineSweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* ================= TEXT ================= */
+
+.privacy-block h3 {
+  color: #00ff88;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.privacy-block p {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.85;
+  font-size: 1rem;
+}
+
+.privacy-block ul {
+  padding-left: 22px;
+  margin-top: 10px;
+}
+
+.privacy-block li {
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 10px;
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .privacy-title {
+    font-size: 2.2rem;
+  }
+
+  .privacy-block {
+    padding: 22px;
+  }
+
+  .privacy-block h3 {
+    font-size: 1.15rem;
+  }
+
+  .privacy-block p,
+  .privacy-block li {
+    font-size: 0.95rem;
+  }
+}
