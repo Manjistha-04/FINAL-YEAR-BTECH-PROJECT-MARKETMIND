@@ -15,7 +15,7 @@ import { Disclaimer } from "../components/Disclaimer";
 import { MarketSentiment } from "../components/MarketSentiment";
 import { useNavigate } from "react-router-dom";
 
-/* ================= COUNT-UP COMPONENT ================= */
+/* ================= COUNT UP ================= */
 function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
   const [value, setValue] = useState(0);
 
@@ -43,6 +43,34 @@ function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
 export function HomePage() {
   const navigate = useNavigate();
 
+  // ✅ API + STATE
+  const API_BASE = "http://localhost:5000/api";
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ✅ FETCH NEWS (ONLY ONE)
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/news`);
+        const data = await res.json();
+
+        console.log("Frontend News API:", data);
+
+        setNews(data);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load news");
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  /* ================= UI STATES ================= */
   const [showAI, setShowAI] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -54,6 +82,7 @@ export function HomePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showMarketSentiment, setShowMarketSentiment] = useState(false);
 
+  /* ================= REFS ================= */
   const featuresRef = useRef<HTMLDivElement | null>(null);
   const aiRef = useRef<HTMLDivElement | null>(null);
   const aboutRef = useRef<HTMLDivElement | null>(null);
@@ -64,235 +93,27 @@ export function HomePage() {
   const riskRef = useRef<HTMLDivElement | null>(null);
   const disclaimerRef = useRef<HTMLDivElement | null>(null);
   const marketSentimentRef = useRef<HTMLDivElement | null>(null);
-  /* ================= FEATURES SCROLL ================= */
-  useEffect(() => {
-    if (showFeatures && featuresRef.current) {
-      const y =
-        featuresRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        100;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showFeatures]);
-
-  /* ================= AI-ANALYSE SCROLL ================= */
-  useEffect(() => {
-    if (showAI && aiRef.current) {
-      const y =
-        aiRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showAI]);
-
-  /* ================= ABOUT SCROLL ================= */
-  useEffect(() => {
-    if (showAbout && aboutRef.current) {
-      const y =
-        aboutRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showAbout]);
-
-  /* ================= CONTACT SCROLL ================= */
-  useEffect(() => {
-    if (showContact && contactRef.current) {
-      const y =
-        contactRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showContact]);
-
-  /* ================= FAQ SCROLL ================= */
-  useEffect(() => {
-    if (showFAQ && faqRef.current) {
-      const y =
-        faqRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showFAQ]);
-
-  /* ================= TERMS SCROLL ================= */
-  useEffect(() => {
-    if (showTerms && termsRef.current) {
-      const y =
-        termsRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showTerms]);
-
-  /* ================= PRIVACY SCROLL ================= */
-  useEffect(() => {
-    if (showPrivacy && privacyRef.current) {
-      const y =
-        privacyRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showPrivacy]);
-
-  /* ================= RISK DISCLOSURE SCROLL ================= */
-  useEffect(() => {
-    if (showRisk && riskRef.current) {
-      const y =
-        riskRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showRisk]);
-  /* ================= DISCLAIMER SCROLL ================= */
-  useEffect(() => {
-    if (showDisclaimer && disclaimerRef.current) {
-      const y =
-        disclaimerRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showDisclaimer]);
-  /* ================= MARKETSENTIMENT SCROLL ================= */
-  useEffect(() => {
-    if (showMarketSentiment && marketSentimentRef.current) {
-      const y =
-        marketSentimentRef.current.getBoundingClientRect().top +
-        window.pageYOffset -
-        120;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, [showMarketSentiment]);
 
   return (
     <>
-      {/* ================= HERO SECTION ================= */}
+      {/* ================= HERO ================= */}
       <div className="homepage-bg">
         <video autoPlay muted loop playsInline>
           <source src={bgVideo} type="video/mp4" />
         </video>
 
         <div className="homepage-overlay"></div>
-
         <img src={logo} alt="MarketMind Logo" className="homepage-logo" />
 
-        {/* ================= NAVBAR ================= */}
+        {/* NAVBAR */}
         <nav className="homepage-navbar">
           <span className="nav-link">Home</span>
-
-          <span
-            className={`nav-link ${showFeatures ? "active" : ""}`}
-            onClick={() => {
-              setShowFeatures(prev => !prev);
-              setShowAI(false);
-              setShowAbout(false);
-              setShowContact(false);
-              setShowFAQ(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-            }}
-          >
-            Features
-          </span>
-
-          <span
-            className={`nav-link ai-link ${showAI ? "active" : ""}`}
-            onClick={() => {
-              setShowAI(prev => !prev);
-              setShowFeatures(false);
-              setShowAbout(false);
-              setShowContact(false);
-              setShowFAQ(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-            }}
-          >
-            AI-Analyse
-          </span>
-
-          <span
-            className={`nav-link ${showAbout ? "active" : ""}`}
-            onClick={() => {
-              setShowAbout(prev => !prev);
-              setShowAI(false);
-              setShowFeatures(false);
-              setShowContact(false);
-              setShowFAQ(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-            }}
-          >
-            About
-          </span>
-
-          <span
-            className={`nav-link ${showContact ? "active" : ""}`}
-            onClick={() => {
-              setShowContact(prev => !prev);
-              setShowAI(false);
-              setShowFeatures(false);
-              setShowAbout(false);
-              setShowFAQ(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-            }}
-          >
-            Contact
-          </span>
-
-          <span
-            className={`nav-link ${showFAQ ? "active" : ""}`}
-            onClick={() => {
-              setShowFAQ(prev => !prev);
-              setShowAI(false);
-              setShowFeatures(false);
-              setShowAbout(false);
-              setShowContact(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-            }}
-          >
-            FAQ
-          </span>
-
-          <span
-            className="nav-link login-btn"
-            onClick={() => {
-              setShowAI(false);
-              setShowFeatures(false);
-              setShowAbout(false);
-              setShowContact(false);
-              setShowFAQ(false);
-              setShowTerms(false);
-              setShowPrivacy(false);
-              setShowRisk(false);
-              setShowDisclaimer(false);
-              navigate("/login");
-            }}
-          >
-            Login
-          </span>
+          <span className="nav-link" onClick={() => setShowFeatures(p => !p)}>Features</span>
+          <span className="nav-link ai-link" onClick={() => setShowAI(p => !p)}>AI-Analyse</span>
+          <span className="nav-link login-btn" onClick={() => navigate("/login")}>Login</span>
         </nav>
 
-        {/* ================= HERO LAYOUT ================= */}
+        {/* HERO CONTENT */}
         <div className="hero-layout">
           <div className="hero-content">
             <h1 className="hero-title">MarketMind</h1>
@@ -301,188 +122,104 @@ export function HomePage() {
               AI-Driven News Intelligence for Smarter Stock Market Insights
             </p>
 
-            <p className="hero-subtitle hero-secondary">
-              Global financial news analysis • Sentiment-based stock prediction •
-              Virtual trading simulation
-            </p>
-
-            {/* ================= AI DATA PULSE ================= */}
+            {/* STATS */}
             <div className="ai-data-pulse">
               <div className="pulse-item">
-                <span className="pulse-value">
-                  <CountUp end={128} />+
-                </span>
+                <span className="pulse-value"><CountUp end={128} />+</span>
                 <span className="pulse-label">News Analyzed Today</span>
               </div>
 
               <div className="pulse-item">
-                <span className="pulse-value">
-                  <CountUp end={6} />
-                </span>
+                <span className="pulse-value"><CountUp end={6} /></span>
                 <span className="pulse-label">AI Models Active</span>
               </div>
-
-              <div className="pulse-item">
-                <span className="pulse-value">
-                  <CountUp end={42} />
-                </span>
-                <span className="pulse-label">Predictions Generated</span>
-              </div>
-
-              <div className="pulse-item">
-                <span className="pulse-value">
-                  <CountUp end={78} />%
-                </span>
-                <span className="pulse-label">Avg Confidence</span>
-              </div>
             </div>
 
-            {showAI && (
-              <div ref={aiRef} className="sentiment-wrapper">
-                <SentimentBar />
-              </div>
-            )}
+            {/* DEBUG NEWS */}
+            {loading && <p>Loading news...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {!loading &&
+              news.slice(0, 3).map((item, i) => (
+                <div key={i}>
+                  <b>{item.title}</b>
+                  <p>{item.sentiment}</p>
+                </div>
+              ))}
           </div>
 
-          {/* ================= AI LIVE INSIGHTS ================= */}
-          <div className="ai-insights-panel animate-in">
-            <div className="ai-insights-header">
-              <h3>AI Live Insights</h3>
-              <span className="preview-badge">PREVIEW</span>
-            </div>
+          {/* RIGHT PANEL */}
+          <div className="ai-insights-panel">
+            <h3>AI Live Insights</h3>
 
-            <div className="news-impact">
-              <span>RBI Policy Update</span>
-              <strong className="bullish">Banking • Bullish</strong>
-            </div>
-
-            <div className="news-impact">
-              <span>IT Export Outlook</span>
-              <strong className="positive">IT • Positive</strong>
-            </div>
-
-            <div className="news-impact">
-              <span>Crude Oil Volatility</span>
-              <strong className="bearish">Energy • Bearish</strong>
-            </div>
-
-            <div className="confidence-section">
-              <div className="confidence-header">
-                <span>Prediction Confidence</span>
-                <strong>78%</strong>
+            {news.slice(0, 3).map((n, i) => (
+              <div key={i} className="news-impact">
+                <span>{n.company}</span>
+                <strong>{n.sentiment}</strong>
               </div>
-
-              <div className="confidence-bar">
-                <div className="confidence-fill" style={{ width: "78%" }} />
-              </div>
-            </div>
-
-            <div className="ai-insight-item muted">
-              Last updated: 08:45 AM
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* ================= CTA ================= */}
+        {/* CTA */}
         <div className="cta-wrapper">
-          <button className="cta-fixed" onClick={() => navigate("/trade")}>Start Trading Now <span className="cta-arrow">→</span></button>
+          <button className="cta-fixed" onClick={() => navigate("/trade")}>
+            Start Trading Now →
+          </button>
         </div>
       </div>
 
-      {/* ================= FEATURES ================= */}
-      {showFeatures && (
-        <div ref={featuresRef}>
-          <Features />
-        </div>
-      )}
+      {/* ✅ NEWS SECTION (PERFECTLY PLACED) */}
+      <div className="news-section">
+        <h2>Latest Market News</h2>
 
-      {/* ================= ABOUT ================= */}
-      {showAbout && (
-        <div ref={aboutRef}>
-          <About />
-        </div>
-      )}
+        {loading && <p>Loading news...</p>}
+        {error && <p>{error}</p>}
 
-      {/* ================= CONTACT ================= */}
-      {showContact && (
-        <div ref={contactRef}>
-          <Contact />
-        </div>
-      )}
+        {news.slice(0, 10).map((item, index) => (
+          <div key={index} className="news-card">
+            <h3>{item.title}</h3>
+            <p>{item.source}</p>
 
-      {/* ================= FAQ ================= */}
-      {showFAQ && (
-        <div ref={faqRef}>
-          <FAQ />
-        </div>
-      )}
+            <p
+              style={{
+                color:
+                  item.sentiment === "positive"
+                    ? "green"
+                    : item.sentiment === "negative"
+                    ? "red"
+                    : "gray",
+              }}
+            >
+              Sentiment: {item.sentiment}
+            </p>
+          </div>
+        ))}
+      </div>
 
-      {/* ================= TERMS ================= */}
-      {showTerms && (
-        <div ref={termsRef}>
-          <TermsOfService />
-        </div>
-      )}
+      {/* OTHER SECTIONS (UNCHANGED) */}
+      {showFeatures && <div ref={featuresRef}><Features /></div>}
+      {showAbout && <div ref={aboutRef}><About /></div>}
+      {showContact && <div ref={contactRef}><Contact /></div>}
+      {showFAQ && <div ref={faqRef}><FAQ /></div>}
+      {showTerms && <div ref={termsRef}><TermsOfService /></div>}
+      {showPrivacy && <div ref={privacyRef}><PrivacyPolicy /></div>}
+      {showRisk && <div ref={riskRef}><RiskDisclosure /></div>}
+      {showDisclaimer && <div ref={disclaimerRef}><Disclaimer /></div>}
+      {showMarketSentiment && <div ref={marketSentimentRef}><MarketSentiment /></div>}
 
-      {/* ================= PRIVACY ================= */}
-      {showPrivacy && (
-        <div ref={privacyRef}>
-          <PrivacyPolicy />
-        </div>
-      )}
-
-      {/* ================= RISK DISCLOSURE ================= */}
-      {showRisk && (
-        <div ref={riskRef}>
-          <RiskDisclosure />
-        </div>
-      )}
-      {/* ================= DISCLAIMER ================= */}
-      {showDisclaimer && (
-        <div ref={disclaimerRef}>
-          <Disclaimer />
-        </div>
-      )}
-      {/* ================= DISCLAIMER ================= */}
-      {showMarketSentiment && (
-        <div ref={marketSentimentRef}>
-          <MarketSentiment />
-        </div>
-      )}
-
-      {/* ================= BOTTOM DARK SECTION ================= */}
-      <section className="bottom-dark-section">
-        <div className="trust-bar-inline">
-          <div className="trust-item">🔍 Interpretable AI Predictions</div>
-          <div className="trust-item">📰 Structured Financial News Processing</div>
-          <div className="trust-item">🎓 Simulation-Based Market Learning</div>
-          <div className="trust-item">🛡️ Non-Transactional Analytical System</div>
-        </div>
-
-        <Footer
-          onFeaturesClick={() => setShowFeatures(prev => !prev)}
-          onAIClick={() => setShowAI(prev => !prev)}
-          onAboutClick={() => setShowAbout(prev => !prev)}
-          onContactClick={() => setShowContact(prev => !prev)}
-          onFAQClick={() => setShowFAQ(prev => !prev)}
-          onTermsClick={() => setShowTerms(prev => !prev)}
-          onPrivacyClick={() => setShowPrivacy(prev => !prev)}
-          onRiskClick={() => setShowRisk(prev => !prev)}
-          onDisclaimerClick={() => setShowDisclaimer(prev => !prev)}
-          onMarketSentimentClick={() => setShowMarketSentiment(prev => !prev)}
-          
-          activeFeatures={showFeatures}
-          activeAI={showAI}
-          activeAbout={showAbout}
-          activeContact={showContact}
-          activeFAQ={showFAQ}
-          activeTerms={showTerms}
-          activePrivacy={showPrivacy}
-          activeRisk={showRisk}
-          activeDisclaimer={showDisclaimer}
-          activeMarketSentiment={showMarketSentiment}
-        />
-      </section>
+      <Footer
+        onFeaturesClick={() => setShowFeatures(p => !p)}
+        onAIClick={() => setShowAI(p => !p)}
+        onAboutClick={() => setShowAbout(p => !p)}
+        onContactClick={() => setShowContact(p => !p)}
+        onFAQClick={() => setShowFAQ(p => !p)}
+        onTermsClick={() => setShowTerms(p => !p)}
+        onPrivacyClick={() => setShowPrivacy(p => !p)}
+        onRiskClick={() => setShowRisk(p => !p)}
+        onDisclaimerClick={() => setShowDisclaimer(p => !p)}
+        onMarketSentimentClick={() => setShowMarketSentiment(p => !p)}
+      />
     </>
   );
 }

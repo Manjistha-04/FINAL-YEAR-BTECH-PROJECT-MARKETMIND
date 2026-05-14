@@ -23,8 +23,12 @@ const newsSchema = new mongoose.Schema(
 
     prediction: {
       type: String,
-      enum: ["BUY", "SELL", "HOLD"],
       default: "HOLD",
+    },
+
+    confidence: {
+      type: Number,
+      default: 50,
     },
   },
   { timestamps: true }

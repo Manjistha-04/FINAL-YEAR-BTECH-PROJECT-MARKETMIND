@@ -2,8 +2,12 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const cron = require("node-cron");
+const fetchNews = require("./services/newsService");
+
 const connectDB = require("./config/db");
 const newsRoutes = require("./routes/newsRoutes");
+const authRoutes = require("./routes/authRoutes"); // ✅ FIXED
 
 const app = express();
 
@@ -16,18 +20,34 @@ app.use(express.json());
 
 // ✅ Routes
 app.use("/api/news", newsRoutes);
+app.use("/api/auth", authRoutes);
 
+// TEST ROUTES
 app.get("/", (req, res) => {
   res.json({ message: "MarketMind Backend Running 🚀" });
-});
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("THIS BACKEND FILE IS RUNNING 🚀");
-  console.log(`Server running on port ${PORT}`);
 });
 
 app.get("/api/test", (req, res) => {
   res.json({ message: "Backend connected successfully 🚀" });
 });
 
+// ⏰ AUTO FETCH NEWS EVERY HOUR
+cron.schedule("0 * * * *", async () => {
+  console.log("⏰ Running automatic news fetch...");
+
+  try {
+    const count = await fetchNews();
+
+    console.log(`✅ Auto news fetch completed: ${count} articles`);
+  } catch (err) {
+    console.error("❌ Cron fetch failed:", err.message);
+  }
+});
+
+// 🚀 START SERVER
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("THIS BACKEND FILE IS RUNNING 🚀");
+  console.log(`Server running on port ${PORT}`);
+});

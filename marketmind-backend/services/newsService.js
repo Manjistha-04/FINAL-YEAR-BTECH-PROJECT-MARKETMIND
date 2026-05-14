@@ -4,6 +4,39 @@ const Sentiment = require("sentiment");
 
 const sentiment = new Sentiment();
 
+// 📈 Financial positive keywords
+const positiveKeywords = {
+  profit: 3,
+  growth: 2,
+  surge: 3,
+  bullish: 4,
+  acquisition: 2,
+  partnership: 2,
+  breakthrough: 4,
+  record: 3,
+  strong: 2,
+  upgrade: 2,
+  beat: 3,
+  rally: 3,
+};
+
+// 📉 Financial negative keywords
+const negativeKeywords = {
+  fraud: -5,
+  lawsuit: -4,
+  crash: -5,
+  layoffs: -3,
+  decline: -2,
+  bearish: -4,
+  downgrade: -3,
+  weak: -2,
+  loss: -3,
+  recession: -5,
+  fall: -2,
+  risk: -2,
+};
+
+
 // 🔥 Company list
 const companies = [
   { name: "Tesla", ticker: "TSLA" },
@@ -31,6 +64,29 @@ const detectCompany = (text) => {
   return { name: "Unknown", ticker: null };
 };
 
+// 🧠 Advanced financial sentiment scoring
+const calculateFinancialScore = (text, baseScore) => {
+  let score = baseScore;
+
+  const lowerText = text.toLowerCase();
+
+  // ✅ Positive keyword boosts
+  for (const word in positiveKeywords) {
+    if (lowerText.includes(word)) {
+      score += positiveKeywords[word];
+    }
+  }
+
+  // ✅ Negative keyword penalties
+  for (const word in negativeKeywords) {
+    if (lowerText.includes(word)) {
+      score += negativeKeywords[word];
+    }
+  }
+
+  return score;
+};
+
 // 🚀 Fetch + Process News
 const fetchNews = async () => {
   try {
@@ -47,7 +103,9 @@ const fetchNews = async () => {
 
     for (const article of articles) {
       // ❌ Skip invalid data
-      if (!article.url) continue;
+      if (!article.url || article.url.includes("consent.yahoo")) {
+        continue;
+      }
 
       // ❌ Skip duplicates
       const existing = await News.findOne({ url: article.url });
@@ -63,11 +121,48 @@ const fetchNews = async () => {
 
       // 📊 Sentiment analysis
       const result = sentiment.analyze(text);
+      const weightedScore = calculateFinancialScore(
+        text,
+        result.score
+      );
 
       let sentimentLabel = "neutral";
-      if (result.score >= 2) sentimentLabel = "positive";
-      else if (result.score <= -2) sentimentLabel = "negative";
+      let prediction = "HOLD";
+      let confidence = 50;
 
+      // ✅ Sentiment label
+      if (weightedScore >= 3) {
+        sentimentLabel = "positive";
+      } else if (weightedScore <= -3) {
+        sentimentLabel = "negative";
+      }
+
+      // ✅ Prediction logic
+      if (weightedScore >= 8) {
+        prediction = "STRONG BUY";
+        confidence = 95;
+
+      } else if (weightedScore >= 5) {
+        prediction = "BUY";
+        confidence = 85;
+
+      } else if (weightedScore >= 2) {
+        prediction = "HOLD";
+        confidence = 65;
+
+      } else if (weightedScore <= -8) {
+        prediction = "STRONG SELL";
+        confidence = 95;
+
+      } else if (weightedScore <= -5) {
+        prediction = "SELL";
+        confidence = 85;
+
+      } else {
+        prediction = "HOLD";
+        confidence = 55;
+      }
+      
       // 🏢 Company detection
       const companyData = detectCompany(text);
 
@@ -78,8 +173,13 @@ const fetchNews = async () => {
         source: article.source?.name || "Unknown",
         url: article.url,
         publishedAt: article.publishedAt,
+
         sentiment: sentimentLabel,
-        sentimentScore: result.score,
+        sentimentScore: weightedScore,
+
+        prediction,
+        confidence,
+
         company: companyData.name,
         ticker: companyData.ticker,
       });

@@ -8,24 +8,59 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleRegister = () => {
-    setError("");
-    setSuccess("Account created successfully!");
+  const handleRegister = async () => {
+    try {
+      setError("");
+      setSuccess("");
+
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Registration failed");
+        return;
+      }
+
+      setSuccess("Account created successfully!");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
   };
 
   return (
     <div className="auth-split-page">
-      {/* 🔥 BACKGROUND VIDEO */}
       <video className="auth-bg-video" autoPlay muted loop playsInline>
         <source src={bgVideo} type="video/mp4" />
       </video>
 
-      {/* 🔥 SIGNUP CARD */}
       <div className="auth-split-card signup-mode">
-        {/* 🔙 BACK BUTTON */}
         <button
           className="auth-back-btn inside-card"
           onClick={() => navigate("/")}
@@ -33,12 +68,10 @@ export default function Signup() {
           ← Back
         </button>
 
-        {/* GREEN PANEL */}
         <div className="welcome-panel">
           <h2>WELCOME!</h2>
         </div>
 
-        {/* FORM PANEL */}
         <div className="form-panel">
           <h3>Register</h3>
 
@@ -53,14 +86,28 @@ export default function Signup() {
             }}
           >
             <div className="input-group">
-              <input type="text" placeholder="Username" required />
+              <input
+                type="text"
+                placeholder="Username"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+
               <span className="input-icon">
                 <User size={14} />
               </span>
             </div>
 
             <div className="input-group">
-              <input type="email" placeholder="Email" required />
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
               <span className="input-icon">
                 <Mail size={14} />
               </span>
@@ -71,7 +118,10 @@ export default function Signup() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
+
               <span
                 className="input-icon clickable"
                 onClick={() => setShowPassword((p) => !p)}

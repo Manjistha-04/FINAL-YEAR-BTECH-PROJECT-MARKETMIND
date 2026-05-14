@@ -8,34 +8,66 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleLogin = () => {
-    setError("");
-    setSuccess("");
+  const handleLogin = async () => {
+    try {
+      setError("");
+      setSuccess("");
 
-    /* 🔐 TEMP LOGIN (NO BACKEND) */
-    localStorage.setItem("isLoggedIn", "true");
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
-    setSuccess("Login successful!");
+      const data = await response.json();
 
-    /* 🚀 Redirect to trading page */
-    setTimeout(() => {
-      navigate("/trade");
-    }, 800);
+      if (!response.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // Save token
+      localStorage.setItem("token", data.token);
+
+      // Save user
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Login flag
+      localStorage.setItem("isLoggedIn", "true");
+
+      setSuccess("Login successful!");
+
+      setTimeout(() => {
+        navigate("/trade");
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
   };
 
   return (
     <div className="auth-split-page">
-      {/* 🔥 BACKGROUND VIDEO */}
       <video className="auth-bg-video" autoPlay muted loop playsInline>
         <source src={bgVideo} type="video/mp4" />
       </video>
 
-      {/* 🔥 LOGIN CARD */}
       <div className="auth-split-card login-mode">
-        {/* 🔙 BACK BUTTON */}
         <button
           className="auth-back-btn inside-card"
           onClick={() => navigate("/")}
@@ -43,14 +75,12 @@ export default function Login() {
           ← Back
         </button>
 
-        {/* GREEN PANEL */}
         <div className="welcome-panel">
           <h2>
             WELCOME <br /> BACK!
           </h2>
         </div>
 
-        {/* FORM PANEL */}
         <div className="form-panel">
           <h3>Login</h3>
 
@@ -65,7 +95,14 @@ export default function Login() {
             }}
           >
             <div className="input-group">
-              <input type="text" placeholder="Username" required />
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
               <span className="input-icon">
                 <User size={14} />
               </span>
@@ -76,7 +113,10 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
+
               <span
                 className="input-icon clickable"
                 onClick={() => setShowPassword((p) => !p)}
