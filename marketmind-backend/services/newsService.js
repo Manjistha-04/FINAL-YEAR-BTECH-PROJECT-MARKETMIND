@@ -3,6 +3,7 @@ const News = require("../models/News");
 const Sentiment = require("sentiment");
 
 const sentiment = new Sentiment();
+const COMPANY_TICKER_MAP = require("../utils/tickerMap");
 
 // 📈 Financial positive keywords
 const positiveKeywords = {
@@ -36,32 +37,234 @@ const negativeKeywords = {
   risk: -2,
 };
 
-
-// 🔥 Company list
-const companies = [
-  { name: "Tesla", ticker: "TSLA" },
-  { name: "Apple", ticker: "AAPL" },
-  { name: "Amazon", ticker: "AMZN" },
-  { name: "Microsoft", ticker: "MSFT" },
-  { name: "Google", ticker: "GOOGL" },
-  { name: "Meta", ticker: "META" },
-  { name: "Reliance", ticker: "RELIANCE" },
-  { name: "TCS", ticker: "TCS" },
-  { name: "Infosys", ticker: "INFY" },
-  { name: "HDFC", ticker: "HDFC" }
+// irrilevence filtering
+const financeKeywords = [
+  "stock",
+  "shares",
+  "market",
+  "earnings",
+  "revenue",
+  "profit",
+  "loss",
+  "investment",
+  "investor",
+  "trading",
+  "acquisition",
+  "merger",
+  "growth",
+  "forecast",
+  "quarter",
+  "financial",
+  "economy",
+  "nasdaq",
+  "wall street",
+  "bullish",
+  "bearish",
+  "ai",
+  "technology",
 ];
 
-// 🔍 Detect company
-const detectCompany = (text) => {
+// 👇 ADD HERE
+const isRelevantFinanceNews = (text) => {
   const lowerText = text.toLowerCase();
 
-  for (let comp of companies) {
-    if (lowerText.includes(comp.name.toLowerCase())) {
-      return comp;
+  // ❌ Block spam/shopping/news junk
+  const blockedKeywords = [
+    "coupon",
+    "discount",
+    "sale",
+    "shipping",
+    "deal",
+    "giveaway",
+    "grill",
+    "controller",
+    "gaming",
+    "iphone case",
+    "usb-c",
+    "headphones",
+    "recipe",
+    "fashion",
+    "celebrity",
+    "sports",
+    "movie",
+    "music",
+    "netflix",
+    "tv show",
+    "iphone charger",
+    "keyboard",
+    "mouse",
+    "murder",
+    "shooter",
+    "shooting",
+    "guns",
+    "ammunition",
+    "arrest",
+    "police",
+    "crime",
+    "court",
+    "killed",
+    "death",
+    "football",
+    "cricket",
+    "wrestling",
+  ];
+
+  for (const word of blockedKeywords) {
+    if (lowerText.includes(word)) {
+      return false;
     }
   }
 
-  return { name: "Unknown", ticker: null };
+  // ✅ Must contain finance/business relevance
+  let financeScore = 0;
+
+  for (const word of financeKeywords) {
+    if (lowerText.includes(word)) {
+      financeScore++;
+    }
+  }
+
+// ✅ Require stronger finance relevance
+  return financeScore >= 1;
+
+  return false;
+};
+
+//  Company list
+const companies = [
+  {
+    name: "Tesla",
+    ticker: "TSLA",
+    keywords: ["tesla", "elon musk", "cybertruck"],
+  },
+
+  {
+    name: "Apple",
+    ticker: "AAPL",
+    keywords: ["apple", "iphone", "ipad", "macbook"],
+  },
+
+  {
+    name: "Amazon",
+    ticker: "AMZN",
+    keywords: ["amazon", "aws", "prime"],
+  },
+
+  {
+    name: "Microsoft",
+    ticker: "MSFT",
+    keywords: [
+      "microsoft",
+      "openai",
+      "chatgpt",
+      "sam altman",
+      "azure",
+      "github copilot",
+    ],
+  },
+
+  {
+    name: "Google",
+    ticker: "GOOGL",
+    keywords: ["google", "alphabet", "youtube", "gemini"],
+  },
+
+  {
+    name: "Meta",
+    ticker: "META",
+    keywords: ["meta", "facebook", "instagram", "whatsapp"],
+  },
+
+  {
+    name: "Reliance",
+    ticker: "RELIANCE",
+    keywords: ["reliance", "jio"],
+  },
+
+  {
+    name: "TCS",
+    ticker: "TCS",
+    keywords: ["tcs", "tata consultancy"],
+  },
+
+  {
+    name: "Infosys",
+    ticker: "INFY",
+    keywords: ["infosys"],
+  },
+
+  {
+    name: "HDFC",
+    ticker: "HDFC",
+    keywords: ["hdfc", "hdfc bank"],
+  },
+];
+const detectCompany = (text) => {
+  const lowerText = text.toLowerCase();
+
+  // ❌ Ignore shopping/deal spam
+  const blockedWords = [
+    "buy now",
+    "discount",
+    "coupon",
+    "sale",
+    "shipping",
+    "available on amazon",
+    "amazon.com",
+    "grill",
+  ];
+
+  for (const word of blockedWords) {
+    if (lowerText.includes(word)) {
+      return {
+        name: "Unknown",
+        ticker: null,
+      };
+    }
+  }
+
+  // ✅ First check company mapping
+  for (const companyName in COMPANY_TICKER_MAP) {
+    const regex = new RegExp(`\\b${companyName}\\b`, "i");
+
+    if (regex.test(text)) {
+      return {
+        name: companyName,
+        ticker: COMPANY_TICKER_MAP[companyName],
+      };
+    }
+  }
+
+  // ✅ Fallback keyword detection
+  for (const comp of companies) {
+    for (const keyword of comp.keywords) {
+      const regex = new RegExp(`\\b${keyword}\\b`, "i");
+
+      if (regex.test(text)) {
+        return {
+          name: comp.name,
+          ticker: comp.ticker,
+        };
+      }
+    }
+  }
+
+  return {
+    name: "Unknown",
+    ticker: null,
+  };
+};
+
+const extractTickerFromTitle = (text) => {
+  const tickerRegex = /\(([A-Z]{2,10})\)/;
+
+  const match = text.match(tickerRegex);
+
+  if (match) {
+    return match[1];
+  }
+
+  return null;
 };
 
 // 🧠 Advanced financial sentiment scoring
@@ -92,9 +295,14 @@ const fetchNews = async () => {
   try {
     console.log("🔑 API KEY:", process.env.NEWS_API_KEY);
 
+    const query = `
+    Tesla OR Apple OR Microsoft OR Amazon OR Google OR Meta
+    OR Reliance OR TCS OR Infosys OR HDFC
+    `;
+
     const response = await axios.get(
-      `https://newsapi.org/v2/everything?q=tesla&apiKey=${process.env.NEWS_API_KEY}`
-    );
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&apiKey=${process.env.NEWS_API_KEY}`
+);
 
     const articles = response.data.articles || [];
     console.log("📰 Articles fetched:", articles.length);
@@ -118,7 +326,10 @@ const fetchNews = async () => {
 
       // 🧠 Combine text
       const text = `${article.title || ""} ${article.description || ""}`;
-
+        if (!isRelevantFinanceNews(text)) {
+          console.log("⛔ Irrelevant news skipped:", article.title);
+          continue;
+        }
       // 📊 Sentiment analysis
       const result = sentiment.analyze(text);
       const weightedScore = calculateFinancialScore(
@@ -165,6 +376,21 @@ const fetchNews = async () => {
       
       // 🏢 Company detection
       const companyData = detectCompany(text);
+
+      const extractedTicker = extractTickerFromTitle(article.title || "");
+
+      if (
+        companyData.name === "Unknown" &&
+        extractedTicker
+      ) {
+        companyData.name = extractedTicker;
+        companyData.ticker = extractedTicker;
+      }
+      
+      if (!companyData.ticker) {
+        console.log("⛔ Unknown company skipped:", article.title);
+        continue;
+      }
 
       // 💾 Save to DB
       await News.create({

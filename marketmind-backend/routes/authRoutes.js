@@ -88,6 +88,7 @@ router.post("/login", async (req, res) => {
         username: user.username,
         email: user.email,
         virtualBalance: user.virtualBalance,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -98,5 +99,42 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+//............UPDATE BALANCE
+router.post(
+  "/update-balance",
+  async (req, res) => {
+    try {
+      const {
+        userId,
+        balance,
+      } = req.body;
+
+      const updatedUser =
+        await User.findByIdAndUpdate(
+          userId,
+          {
+            virtualBalance:
+              balance,
+          },
+          {
+            new: true,
+          }
+        );
+
+      res.status(200).json({
+        message:
+          "Balance updated successfully",
+        user: updatedUser,
+      });
+    } catch (err) {
+      console.error(err);
+
+      res.status(500).json({
+        message:
+          "Server error",
+      });
+    }
+  }
+);
 
 module.exports = router;

@@ -8,6 +8,9 @@ const fetchNews = require("./services/newsService");
 const connectDB = require("./config/db");
 const newsRoutes = require("./routes/newsRoutes");
 const authRoutes = require("./routes/authRoutes"); // ✅ FIXED
+const adminRoutes = require("./routes/adminRoutes");
+const tradeRoutes = require("./routes/tradeRoutes");
+const holdingRoutes = require("./routes/holdingRoutes");
 
 const app = express();
 
@@ -21,6 +24,11 @@ app.use(express.json());
 // ✅ Routes
 app.use("/api/news", newsRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/trades", tradeRoutes);
+
+// admin
+app.use("/api/admin", adminRoutes);
+app.use("/api/holdings", holdingRoutes);
 
 // TEST ROUTES
 app.get("/", (req, res) => {
@@ -29,6 +37,23 @@ app.get("/", (req, res) => {
 
 app.get("/api/test", (req, res) => {
   res.json({ message: "Backend connected successfully 🚀" });
+});
+
+app.get("/api/fetch-news", async (req, res) => {
+  try {
+    const count = await fetchNews();
+
+    res.json({
+      success: true,
+      saved: count,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+    });
+  }
 });
 
 // ⏰ AUTO FETCH NEWS EVERY HOUR
