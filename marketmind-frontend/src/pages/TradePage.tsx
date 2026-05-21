@@ -2,6 +2,18 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.png";
 import "./TradePage.css";
 import { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+} from "recharts";
 
 const API_BASE = "http://localhost:5000/api";
 
@@ -16,16 +28,33 @@ import {
 
 type MarketMap = Record<string, MarketItem>;
 
-const WATCHLIST_KEY = "marketmind_watchlist";
-const HOLDINGS_KEY = "marketmind_holdings";
-const BALANCE_KEY = "marketmind_balance";
+const getStorageKeys = (userId: string) => ({
+  WATCHLIST_KEY: `marketmind_watchlist_${userId}`,
 
-const ORDERS_KEY = "marketmind_orders";
-const ORDERS_DATE_KEY =
-  "marketmind_orders_date";
+  HOLDINGS_KEY: `marketmind_holdings_${userId}`,
+
+  BALANCE_KEY: `marketmind_balance_${userId}`,
+
+  ORDERS_KEY: `marketmind_orders_${userId}`,
+
+  ORDERS_DATE_KEY: `marketmind_orders_date_${userId}`,
+});
 
 export function TradePage() {
   const navigate = useNavigate();
+  const storedUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+  const USER_ID = storedUser.id;
+  const {
+    WATCHLIST_KEY,
+    HOLDINGS_KEY,
+    BALANCE_KEY,
+  } = getStorageKeys(USER_ID);
+
+  const [username] = useState(
+    storedUser.username || "Trader"
+  );
 
   const [search, setSearch] =
     useState("");
@@ -61,14 +90,20 @@ export function TradePage() {
 
   const [loading, setLoading] =
     useState(true);
-
-  const storedUser = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
-
-  const [username] = useState(
-    storedUser.username || "Trader"
-  );
+  const [Quantity, setQuantity] =
+  useState<Record<string, number>>({});
+  const [manualEnabled, setManualEnabled] =
+    useState<
+      Record<
+        string,
+        {
+          buy?: boolean;
+          sell?: boolean;
+        }
+      >
+    >({});
+  
+  
 
   /* 💰 BALANCE */
   const [balance, setBalance] =
@@ -86,51 +121,87 @@ export function TradePage() {
 
   /* 📦 HOLDINGS */
   const [holdings, setHoldings] =
-    useState<any[]>(() => {
-      const saved =
-        localStorage.getItem(
-          HOLDINGS_KEY
-        );
-
-      return saved
-        ? JSON.parse(saved)
-        : [];
-    });
+    useState<any[]>([]);
 
   /* 📜 ORDERS */
   const [orders, setOrders] =
-    useState<any[]>(() => {
-      const savedOrders =
-        localStorage.getItem(
-          ORDERS_KEY
-        );
+    useState<any[]>([])
+    
+    // chart 
 
-      const savedDate =
-        localStorage.getItem(
-          ORDERS_DATE_KEY
-        );
+  // Portfolio growth demo data
+  const portfolioData = [
+    { day: "Mon", value: 92000 },
+    { day: "Tue", value: 94500 },
+    { day: "Wed", value: 97000 },
+    { day: "Thu", value: 96000 },
+    { day: "Fri", value: balance },
+  ];
 
-      const today =
-        new Date().toDateString();
+  // Holdings distribution
+  const holdingsData = holdings.map((h) => ({
+    name: h.ticker,
+    value: h.quantity * h.avgPrice,
+  }));
 
-      /* 🔄 RESET DAILY */
-      if (savedDate !== today) {
-        localStorage.removeItem(
-          ORDERS_KEY
-        );
+  // ===== PORTFOLIO ANALYTICS =====
 
-        localStorage.setItem(
-          ORDERS_DATE_KEY,
-          today
-        );
+  const totalInvested = holdings.reduce(
+    (sum, h) => sum + h.quantity * h.avgPrice,
+    0
+  );
 
-        return [];
-      }
+  const currentPortfolioValue = holdings.reduce(
+    (sum, h) => {
+      const currentPrice =
+        marketData[h.ticker]?.price || h.avgPrice;
 
-      return savedOrders
-        ? JSON.parse(savedOrders)
-        : [];
-    });
+      return sum + h.quantity * currentPrice;
+    },
+    0
+  );
+
+  const totalPnL =
+    currentPortfolioValue - totalInvested;
+
+  const totalPnLPercent =
+    totalInvested > 0
+      ? ((totalPnL / totalInvested) * 100).toFixed(2)
+      : "0";
+
+  // Market trend chart
+  const marketTrendData = TOP_5_STOCKS.map(
+    (stock) => ({
+      name: stock,
+
+      price:
+        marketData[stock]
+          ?.price || 0,
+    })
+  );
+  // ===== TOP GAINERS / LOSERS =====
+
+  const sortedStocks = Object.entries(marketData)
+    .map(([key, value]) => ({
+      name: key,
+      ...value,
+    }))
+
+    .sort((a, b) => b.change - a.change);
+
+  const topGainers = sortedStocks.slice(0, 5);
+
+  const topLosers = [...sortedStocks]
+    .sort((a, b) => a.change - b.change)
+    .slice(0, 5);
+
+  const COLORS = [
+    "#22c55e",
+    "#3b82f6",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+  ];
 
   /* 💾 SAVE WATCHLIST */
   useEffect(() => {
@@ -148,6 +219,58 @@ export function TradePage() {
     );
   }, [holdings]);
 
+  useEffect(() => {
+    const fetchHoldings = async () => {
+      try {
+
+        const res = await fetch(
+          `${API_BASE}/holdings/${USER_ID}`
+        );
+
+        const data = await res.json();
+
+        setHoldings(data);
+
+      } catch (err) {
+        console.error(
+          "Holdings fetch error:",
+          err
+        );
+      }
+    };
+    if (USER_ID) {
+      fetchHoldings();
+    }
+
+  }, [USER_ID]);
+  
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/trades/user/${USER_ID}`
+        );
+
+        const data = await res.json();
+
+        setOrders(data);
+
+      } catch (err) {
+        console.error(
+          "Orders fetch error:",
+          err
+        );
+      }
+    };
+
+    if (USER_ID) {
+      fetchOrders();
+    }
+
+  }, [USER_ID]);
+
+   
+
   /* 💾 SAVE BALANCE */
   useEffect(() => {
     localStorage.setItem(
@@ -156,13 +279,7 @@ export function TradePage() {
     );
   }, [balance]);
 
-  /* 💾 SAVE ORDERS */
-  useEffect(() => {
-    localStorage.setItem(
-      ORDERS_KEY,
-      JSON.stringify(orders)
-    );
-  }, [orders]);
+ 
 
   /* 🔄 LIVE PRICE */
   useEffect(() => {
@@ -241,14 +358,15 @@ export function TradePage() {
   };
 
   /* 🟢 BUY */
-  const handleBuy = (item: any) => {
-    const price =
-      marketData[item.ticker]
-        ?.price ||
-      item.price ||
-      1000;
+  const handleBuy = async (item: any) => {
+    const price = marketData[item.ticker]?.price || item.price ||1000;
+    const quantity =
+      Quantity[item._id] || 1;
 
-    if (balance < price) {
+    const totalCost =
+      price * quantity;
+      
+    if (balance < totalCost) {
       alert(
         "Insufficient balance"
       );
@@ -256,9 +374,26 @@ export function TradePage() {
       return;
     }
 
-    setBalance(
-      (prev: number) =>
-        prev - price
+    const newBalance =
+      balance - totalCost;
+
+    setBalance(newBalance);
+
+    fetch(
+      `${API_BASE}/auth/update-balance`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+          "application/json",
+        },
+
+        body: JSON.stringify({
+          userId: storedUser.id,
+          balance: newBalance,
+        }),
+      }
     );
 
     const existing =
@@ -276,13 +411,13 @@ export function TradePage() {
                 ...h,
 
                 quantity:
-                  h.quantity + 1,
+                  h.quantity + quantity,
 
                 avgPrice:
                   (h.avgPrice *
                     h.quantity +
-                    price) /
-                  (h.quantity + 1),
+                    totalCost) /
+                  (h.quantity + quantity),
               }
             : h
         )
@@ -293,11 +428,56 @@ export function TradePage() {
         {
           ticker: item.ticker,
           company: item.company,
-          quantity: 1,
+          quantity,
           avgPrice: price,
         },
       ]);
     }
+
+    const updatedHolding = existing
+      ? {
+        quantity:
+          existing.quantity + quantity,
+
+        avgPrice:
+          (existing.avgPrice *
+            existing.quantity +
+            totalCost) /
+          (existing.quantity + quantity),
+        }
+      : {
+          quantity,
+          avgPrice: price,
+        };
+
+    await fetch(
+      `${API_BASE}/holdings/update`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          userId: USER_ID,
+
+          ticker: item.ticker,
+
+          company:
+            item.company || "Unknown",
+
+          quantity:
+            updatedHolding.quantity,
+
+          avgPrice:
+            updatedHolding.avgPrice,
+        }),
+      }
+    );
+
+
 
     /* 📜 SAVE ORDER */
     const newOrder = {
@@ -311,7 +491,7 @@ export function TradePage() {
 
       price,
 
-      quantity: 1,
+      quantity,
 
       time:
         new Date().toLocaleTimeString(),
@@ -322,13 +502,38 @@ export function TradePage() {
       ...prev,
     ]);
 
+    fetch(`${API_BASE}/trades/add`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        userId: storedUser.id,
+        username: storedUser.username,
+
+        ticker: item.ticker || item.company || "UNKNOWN",
+
+        company: item.company || item.ticker || "Unknown",
+
+        type: "BUY",
+
+        quantity,
+
+        price,
+
+        total: totalCost,
+      }),
+    });
+
     alert(
-      `Bought ${item.ticker} @ ₹${price}`
+      `Bought ${quantity} $(item.ticker) @ ₹${price}`
     );
   };
 
   /* 🔴 SELL */
-  const handleSell = (
+  const handleSell = async (
     item: any
   ) => {
     const price =
@@ -336,6 +541,11 @@ export function TradePage() {
         ?.price ||
       item.price ||
       1000;
+    const quantity =
+      Quantity[item._id] || 1;
+
+    const totalSell =
+      price * quantity;
 
     const existing =
       holdings.find(
@@ -344,7 +554,8 @@ export function TradePage() {
           item.ticker
       );
 
-    if (!existing) {
+    if (
+  !existing || existing.quantity < quantity) {
       alert(
         "You don't own this stock"
       );
@@ -352,20 +563,31 @@ export function TradePage() {
       return;
     }
 
-    setBalance(
-      (prev: number) =>
-        prev + price
+    const newBalance =
+      balance + totalSell;
+    setBalance(newBalance);
+    fetch(
+      `${API_BASE}/auth/update-balance`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          userId: storedUser.id,
+          balance: newBalance,
+        }),
+      }
     );
 
-    if (
-      existing.quantity === 1
-    ) {
+    if ( existing.quantity - quantity <= 1) {
       setHoldings((prev) =>
         prev.filter(
           (h) =>
-            h.ticker !==
-            item.ticker
-        )
+            h.ticker !== item.ticker)
       );
     } else {
       setHoldings((prev) =>
@@ -375,10 +597,60 @@ export function TradePage() {
                 ...h,
 
                 quantity:
-                  h.quantity - 1,
+                  h.quantity - quantity,
               }
             : h
         )
+      );
+    }
+
+    const updatedQuantity = existing.quantity - quantity;
+
+    if (updatedQuantity <= 0) {
+
+      await fetch(
+        `${API_BASE}/holdings/delete`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            userId: USER_ID,
+            ticker: item.ticker,
+          }),
+        }
+      );
+  
+    } else {
+
+      await fetch(
+        `${API_BASE}/holdings/update`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            userId: USER_ID,
+
+            ticker: item.ticker,
+
+            company:
+              item.company || "Unknown",
+
+            quantity: updatedQuantity,
+
+            avgPrice:
+              existing.avgPrice,
+          }),
+        }
       );
     }
 
@@ -394,7 +666,7 @@ export function TradePage() {
 
       price,
 
-      quantity: 1,
+      quantity,
 
       time:
         new Date().toLocaleTimeString(),
@@ -405,8 +677,33 @@ export function TradePage() {
       ...prev,
     ]);
 
+    fetch(`${API_BASE}/trades/add`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        userId: storedUser.id,
+        username: storedUser.username,
+
+        ticker: item.ticker || "UNKNOWN",
+
+        company: item.company || "Unknown",
+
+        type: "SELL",
+
+        quantity,
+
+        price,
+
+        total: totalSell,
+      }),
+    });
+
     alert(
-      `Sold ${item.ticker} @ ₹${price}`
+      `Sold ${quantity} ${item.ticker} @ ₹${price}`
     );
   };
 
@@ -481,6 +778,13 @@ export function TradePage() {
 
         <div className="trade-center">
           <nav className="trade-nav">
+            {storedUser.role === "admin" && (
+              <span
+                onClick={() => navigate("/admin")}
+              >
+                Admin Panel
+              </span>
+            )}
             <span
               className={
                 activeTab ===
@@ -732,6 +1036,64 @@ export function TradePage() {
                 Market Overview
                 (Top 5 Stocks)
               </h2>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                  "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: "20px",
+                  marginBottom: "30px",
+                }}
+              >
+                <div className="modern-card">
+                  <h3>Total Portfolio</h3>
+
+                  <h1>
+                    ₹
+                    {currentPortfolioValue.toLocaleString()}
+                  </h1>
+                </div>
+                <div className="modern-card">
+                  <h3>Total Invested</h3>
+                  <h1>
+                    ₹
+                    {totalInvested.toLocaleString()}
+                  </h1>
+                </div>
+                <div className="modern-card">
+                  <h3>Total P/L</h3>
+
+                  <h1
+                    style={{
+                      color:
+                        totalPnL >= 0
+                          ? "#22c55e"
+                          : "#ef4444",
+                    }}
+                  >
+                    {totalPnL >= 0 ? "+" : ""}
+                    ₹{totalPnL.toFixed(2)}
+                  </h1>
+                </div>
+                <div className="modern-card">
+                  <h3>P/L %</h3>
+
+                  <h1
+                    style={{
+                      color:
+                        totalPnL >= 0
+                          ? "#22c55e"
+                          : "#ef4444",
+                    }}
+                  >
+                    {totalPnL >= 0 ? "+" : ""}
+                    ₹{totalPnLPercent}%
+                  </h1>
+                </div>
+
+
+
+              </div>
 
               <div className="trade-table">
                 <div className="table-head">
@@ -799,6 +1161,7 @@ export function TradePage() {
               </h2>
 
               <div className="ai-news-section">
+
                 {loading ? (
                   <p>
                     Loading AI
@@ -938,37 +1301,392 @@ export function TradePage() {
 
                           <div
                             style={{
-                              marginTop:
-                                "10px",
+                              marginTop: "10px",
+                              display: "flex",
+                              gap: "10px",
+                              flexWrap: "wrap",
                             }}
                           >
+                          <div className="quantity-box">
                             <button
-                              className="buy-btn"
                               onClick={() =>
-                                handleBuy(
-                                  item
-                                )
+                                setQuantity((prev) => ({
+                                  ...prev,
+                                  [item._id]: Math.max(
+                                    1,
+                                    (prev[item._id] || 1) - 1
+                                  ),
+                                }))
                               }
                             >
-                              BUY
+                              -
                             </button>
 
+                            <input
+                              type="number"
+                              min="1"
+                              value={Quantity[item._id] || 1}
+                              onChange={(e) =>
+                                setQuantity((prev) => ({
+                                  ...prev,
+                                  [item._id]:
+                                    Number(e.target.value) || 1,
+                                }))
+                              }
+                            />
+
                             <button
-                              className="sell-btn"
                               onClick={() =>
-                                handleSell(
-                                  item
-                                )
+                                setQuantity((prev) => ({
+                                  ...prev,
+                                  [item._id]:
+                                    (prev[item._id] || 1) + 1,
+                                }))
                               }
                             >
-                              SELL
+                              +
                             </button>
+                          </div>
+
+                            {/* BUY BUTTON */}
+                            <button
+                              className={`buy-btn ${
+                                (
+                                  (
+                                    item.prediction === "SELL" ||
+                                    item.prediction === "STRONG SELL" ||
+                                    item.prediction === "HOLD"
+                                  ) &&
+                                  !manualEnabled[item._id]?.buy
+                                )
+                                  ? "disabled-btn"
+                                  : ""
+                              }`}
+                              disabled={
+                                (
+                                  item.prediction === "SELL" ||
+                                  item.prediction === "STRONG SELL" ||
+                                  item.prediction === "HOLD"
+                                ) &&
+                                !manualEnabled[item._id]?.buy
+                              }
+                              onClick={() => handleBuy(item)}
+                            >
+                            BUY
+                            </button>
+
+                            {/* SELL BUTTON */}
+                            <button
+                              className={`sell-btn ${
+                                (
+                                  (
+                                    item.prediction === "BUY" ||
+                                    item.prediction === "STRONG BUY" ||
+                                    item.prediction === "HOLD"
+                                  ) &&
+                                  !manualEnabled[item._id]?.sell
+                                )
+                                  ? "disabled-btn"
+                                  : ""
+                              }`}
+                              disabled={
+                                (
+                                  item.prediction === "BUY" ||
+                                  item.prediction === "STRONG BUY" ||
+                                  item.prediction === "HOLD"
+                                ) &&
+                                !manualEnabled[item._id]?.sell
+                              }
+                              onClick={() => handleSell(item)}
+                            >
+                            SELL
+                            </button>
+
+                            {/* HOLD MODE */}
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "8px",
+                                marginTop: "8px",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <button
+                                className="manual-btn"
+                                onClick={() =>
+                                  setManualEnabled((prev) => ({
+                                    ...prev,
+                                    [item._id]: {
+                                      ...prev[item._id],
+                                      buy: true,
+                                    },
+                                  }))
+                                }
+                              >
+                                Enable BUY
+                              </button>
+
+                              <button
+                                className="manual-btn"
+                                onClick={() =>
+                                  setManualEnabled((prev) => ({
+                                    ...prev,
+                                    [item._id]: {
+                                      ...prev[item._id],
+                                      sell: true,
+                                    },
+                                  }))
+                                }
+                              >
+                                Enable SELL
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )
                     )
                 )}
               </div>
+              {/* ===== CHARTS ===== */}
+
+              <div
+                style={{
+                  marginTop: "40px",
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(350px, 1fr))",
+                  gap: "20px",
+                }}
+              >
+              {/* PORTFOLIO CHART */}
+              <div className="modern-card">
+                <h3
+                  style={{
+                    marginBottom: "20px",
+                  }}
+                >
+                  Portfolio Growth
+                </h3>
+
+                <ResponsiveContainer
+                  width="100%"
+                  height={300}
+                >
+                  <LineChart
+                    data={portfolioData}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                    />
+
+                    <XAxis dataKey="day" />
+
+                    <YAxis />
+
+                    <Tooltip />
+
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#22c55e"
+                      strokeWidth={3}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              {/* ===== TOP MOVERS ===== */}
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: "20px",
+                  marginTop: "30px",
+                }}
+              >
+              {/* TOP GAINERS */}
+              <div className="modern-card">
+                <h2
+                  style={{
+                    marginBottom: "20px",
+                    color: "#22c55e",
+                  }}
+                >
+                  🚀 Top Gainers
+                </h2>
+
+                {topGainers.map((stock) => (
+                  <div
+                    key={stock.name}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "12px 0",
+                      borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <div>
+                      <strong>{stock.name}</strong>
+
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          opacity: 0.7,
+                        }}
+                      >
+                        ₹{stock.price.toFixed(2)}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        color: "#22c55e",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      +{stock.change.toFixed(2)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* TOP LOSERS */}
+              <div className="modern-card">
+                <h2
+                  style={{
+                    marginBottom: "20px",
+                    color: "#ef4444",
+                  }}
+                >
+                  📉 Top Losers
+                </h2>
+
+                {topLosers.map((stock) => (
+                  <div
+                    key={stock.name}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "12px 0",
+                      borderBottom:
+                        "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <div>
+                      <strong>{stock.name}</strong>
+
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          opacity: 0.7,
+                        }}
+                      >
+                        ₹{stock.price.toFixed(2)}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        color: "#ef4444",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {stock.change.toFixed(2)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+
+
+
+              {/* HOLDINGS PIE */}
+              <div className="modern-card">
+                <h3
+                  style={{
+                    marginBottom: "20px",
+                  }}
+                >
+                  Portfolio Distribution
+                </h3>
+
+                <ResponsiveContainer
+                  width="100%"
+                  height={300}
+                >
+                <PieChart>
+                  <Pie
+                    data={holdingsData}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={100}
+                    label
+                  >
+                    {holdingsData.map(
+                      (
+                        entry,
+                        index
+                      ) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            COLORS[
+                              index %
+                                COLORS.length
+                            ]
+                          }
+                        />
+                      )
+                    )}
+                  </Pie>
+
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* MARKET TREND */}
+            <div className="modern-card">
+              <h3
+                style={{
+                  marginBottom: "20px",
+                }}
+              >
+                Market Trend
+              </h3>
+
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+              <LineChart
+                data={
+                  marketTrendData
+                }
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis dataKey="name" />
+
+                <YAxis />
+
+                <Tooltip />
+
+                <Line
+                  type="monotone"
+                  dataKey="price"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+               
             </>
           )}
 
@@ -1015,9 +1733,7 @@ export function TradePage() {
                       order
                     ) => (
                       <div
-                        key={
-                          order.id
-                        }
+                        key={order._id || order.id}
                         className="modern-card"
                       >
                         <div className="card-top">
