@@ -8,9 +8,39 @@ export function AdminPage() {
   const [allOrders, setAllOrders] =
     useState<any[]>([]);
 
+  const getSavedNews = async () => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/news`
+      );
+
+      const data = await res.json();
+      setNews(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchFreshNews = async () => {
+  try {
+    const res = await fetch(
+      `${API_BASE}/news/fetch`
+    );
+
+    const data = await res.json();
+
+    console.log(data);
+
+    getSavedNews();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
   useEffect(() => {
     fetchUsers();
-    fetchNews();
+    getSavedNews();
     fetchTrades();
   
   }, []);
@@ -68,6 +98,21 @@ export function AdminPage() {
       }}
     >
       <h1>Admin Dashboard</h1>
+      <button
+        onClick={fetchFreshNews}
+        style={{
+          marginTop: "20px",
+          padding: "12px 20px",
+          border: "none",
+          borderRadius: "10px",
+          background: "#2563eb",
+          color: "white",
+          fontWeight: "bold",
+          cursor: "pointer",
+        }}
+      >
+        Fetch Fresh News
+      </button>
 
       {/* ANALYTICS */}
       <div

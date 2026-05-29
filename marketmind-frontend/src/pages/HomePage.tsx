@@ -385,7 +385,16 @@ export function HomePage() {
 
         {/* ================= CTA ================= */}
         <div className="cta-wrapper">
-          <button className="cta-fixed" onClick={() => navigate("/trade")}>Start Trading Now <span className="cta-arrow">→</span></button>
+          <button className="cta-fixed" onClick={() => {
+            const token = localStorage.getItem("token");
+            if (token){
+              navigate("/trade");
+            }else{
+              navigate("/login");
+            }
+            }}
+          >
+            Start Trading Now <span className="cta-arrow">→</span></button>
         </div>
       </div>
 

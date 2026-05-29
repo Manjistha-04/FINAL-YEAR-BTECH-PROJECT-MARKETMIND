@@ -26,6 +26,8 @@ import {
   MarketItem,
 } from "../pages/stocklist";
 
+import { availableStocks } from "../data/stocks";
+
 type MarketMap = Record<string, MarketItem>;
 
 const getStorageKeys = (userId: string) => ({
@@ -58,6 +60,13 @@ export function TradePage() {
 
   const [search, setSearch] =
     useState("");
+  
+
+  const [selectedStock, setSelectedStock] =
+    useState("RELIANCE");
+
+  const [manualQuantity, setManualQuantity] =
+    useState(1);
 
   const [showResults, setShowResults] =
     useState(false);
@@ -90,7 +99,7 @@ export function TradePage() {
 
   const [loading, setLoading] =
     useState(true);
-  const [Quantity, setQuantity] =
+  const [quantity, setQuantity] =
   useState<Record<string, number>>({});
   const [manualEnabled, setManualEnabled] =
     useState<
@@ -203,6 +212,8 @@ export function TradePage() {
     "#8b5cf6",
   ];
 
+  
+
   /* 💾 SAVE WATCHLIST */
   useEffect(() => {
     localStorage.setItem(
@@ -218,6 +229,31 @@ export function TradePage() {
       JSON.stringify(holdings)
     );
   }, [holdings]);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/auth/user/${USER_ID}`
+        );
+
+        const data = await res.json();
+
+        if (data?.virtualBalance !== undefined) {
+          setBalance(data.virtualBalance);
+        }
+      } catch (err) {
+        console.error(
+          "Balance fetch error:",
+          err
+        );
+      }
+    };
+
+    if (USER_ID) {
+      fetchBalance();
+    }
+  }, [USER_ID]);
 
   useEffect(() => {
     const fetchHoldings = async () => {
@@ -358,13 +394,31 @@ export function TradePage() {
   };
 
   /* 🟢 BUY */
-  const handleBuy = async (item: any) => {
+  const handleBuy = async (itemOrTicker: any, manualQuantity?: number) => {
+    const item = typeof itemOrTicker === "string" ? {
+      ticker: itemOrTicker,
+
+      company: availableStocks.find((s) =>
+        s.ticker === itemOrTicker)?.company || itemOrTicker,
+    }
+    : itemOrTicker;
+
+    if (
+  item.ticker === "MARKET" ||
+  item.company === "Market"
+) {
+  alert(
+    "Generic market news cannot be traded"
+  );
+  return;
+}
+
     const price = marketData[item.ticker]?.price || item.price ||1000;
-    const quantity =
-      Quantity[item._id] || 1;
+    const tradeQuantity =
+      manualQuantity ?? quantity[item._id] ?? 1;
 
     const totalCost =
-      price * quantity;
+      price * tradeQuantity;
       
     if (balance < totalCost) {
       alert(
@@ -411,13 +465,13 @@ export function TradePage() {
                 ...h,
 
                 quantity:
-                  h.quantity + quantity,
+                  h.quantity + tradeQuantity,
 
                 avgPrice:
                   (h.avgPrice *
                     h.quantity +
                     totalCost) /
-                  (h.quantity + quantity),
+                  (h.quantity + tradeQuantity),
               }
             : h
         )
@@ -428,7 +482,7 @@ export function TradePage() {
         {
           ticker: item.ticker,
           company: item.company,
-          quantity,
+          quantity: tradeQuantity,
           avgPrice: price,
         },
       ]);
@@ -437,16 +491,16 @@ export function TradePage() {
     const updatedHolding = existing
       ? {
         quantity:
-          existing.quantity + quantity,
+          existing.quantity + tradeQuantity,
 
         avgPrice:
           (existing.avgPrice *
             existing.quantity +
             totalCost) /
-          (existing.quantity + quantity),
+          (existing.quantity + tradeQuantity),
         }
       : {
-          quantity,
+          quantity: tradeQuantity,
           avgPrice: price,
         };
 
@@ -491,7 +545,7 @@ export function TradePage() {
 
       price,
 
-      quantity,
+      tradeQuantity,
 
       time:
         new Date().toLocaleTimeString(),
@@ -502,50 +556,76 @@ export function TradePage() {
       ...prev,
     ]);
 
-    fetch(`${API_BASE}/trades/add`, {
-      method: "POST",
+    try{
+      await fetch(
+        `${API_BASE}/trades/add`,
+        {
+          method: "POST",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-      body: JSON.stringify({
-        userId: storedUser.id,
-        username: storedUser.username,
+          body: JSON.stringify({
+            userId: storedUser.id,
+            username: storedUser.username,
 
-        ticker: item.ticker || item.company || "UNKNOWN",
+            ticker: item.ticker || item.company || "UNKNOWN",
 
-        company: item.company || item.ticker || "Unknown",
+            company: item.company || item.ticker || "Unknown",
 
-        type: "BUY",
+            type: "BUY",
 
-        quantity,
+            quantity: tradeQuantity,
 
-        price,
+            price,
 
-        total: totalCost,
-      }),
-    });
-
-    alert(
-      `Bought ${quantity} $(item.ticker) @ ₹${price}`
+            total: totalCost,
+          }),
+        }
+      );
+    } catch(err){
+      console.error(
+        "Trade save failed:",
+        err
     );
+  }
+  alert(`${tradeQuantity} ${item.ticker} item bought sucessfully`);
+
   };
 
   /* 🔴 SELL */
   const handleSell = async (
-    item: any
+    itemOrTicker: any,
+    manualQuantity?: number
   ) => {
+    const item = typeof itemOrTicker === "string"
+      ? {
+        ticker: itemOrTicker,
+        company: availableStocks.find(
+          (s) => s.ticker === itemOrTicker)?.company || itemOrTicker,
+        }
+      : itemOrTicker;
+
+      if (
+        item.ticker === "MARKET" ||
+        item.company === "Market"
+      ) {
+      alert(
+        "Generic market news cannot be traded"
+      );
+      return;
+      }
     const price =
       marketData[item.ticker]
         ?.price ||
+
       item.price ||
       1000;
-    const quantity =
-      Quantity[item._id] || 1;
+    const tradeQuantity = manualQuantity ?? quantity[item._id] ?? 1;
 
     const totalSell =
-      price * quantity;
+      price * tradeQuantity;
 
     const existing =
       holdings.find(
@@ -555,7 +635,7 @@ export function TradePage() {
       );
 
     if (
-  !existing || existing.quantity < quantity) {
+  !existing || existing.quantity < tradeQuantity) {
       alert(
         "You don't own this stock"
       );
@@ -583,11 +663,13 @@ export function TradePage() {
       }
     );
 
-    if ( existing.quantity - quantity <= 1) {
+    const updatedQuantity = existing.quantity - tradeQuantity;
+
+    if (updatedQuantity <= 0) {
       setHoldings((prev) =>
         prev.filter(
-          (h) =>
-            h.ticker !== item.ticker)
+          (h) => h.ticker !== item.ticker
+        )
       );
     } else {
       setHoldings((prev) =>
@@ -595,16 +677,13 @@ export function TradePage() {
           h.ticker === item.ticker
             ? {
                 ...h,
-
-                quantity:
-                  h.quantity - quantity,
+                quantity: updatedQuantity,
               }
             : h
         )
       );
     }
 
-    const updatedQuantity = existing.quantity - quantity;
 
     if (updatedQuantity <= 0) {
 
@@ -664,9 +743,9 @@ export function TradePage() {
 
       company: item.company,
 
-      price,
+      avgPrice:price,
 
-      quantity,
+      quantity: tradeQuantity,
 
       time:
         new Date().toLocaleTimeString(),
@@ -677,35 +756,41 @@ export function TradePage() {
       ...prev,
     ]);
 
-    fetch(`${API_BASE}/trades/add`, {
-      method: "POST",
+    try{
+      await fetch(
+        `${API_BASE}/trades/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+          body: JSON.stringify({
+            userId: storedUser.id,
+            username: storedUser.username,
 
-      body: JSON.stringify({
-        userId: storedUser.id,
-        username: storedUser.username,
+            ticker: item.ticker || "UNKNOWN",
 
-        ticker: item.ticker || "UNKNOWN",
+            company: item.company || "Unknown",
 
-        company: item.company || "Unknown",
+            type: "SELL",
 
-        type: "SELL",
+            quantity: tradeQuantity,
 
-        quantity,
+            price,
 
-        price,
-
-        total: totalSell,
-      }),
-    });
-
-    alert(
-      `Sold ${quantity} ${item.ticker} @ ₹${price}`
-    );
-  };
+            total: totalSell,
+          }),
+        }
+      );
+    } catch (err){
+      console.error(
+        "Trade save failed:",
+        err
+      );
+  }
+  alert(`${tradeQuantity} ${item.ticker} item sold successfully`);
+};
 
   /* 🔥 FETCH AI NEWS */
   useEffect(() => {
@@ -1072,7 +1157,7 @@ export function TradePage() {
                     }}
                   >
                     {totalPnL >= 0 ? "+" : ""}
-                    ₹{totalPnL.toFixed(2)}
+                    {totalPnLPercent}%
                   </h1>
                 </div>
                 <div className="modern-card">
@@ -1149,17 +1234,111 @@ export function TradePage() {
                   }
                 )}
               </div>
+              <div className="modern-card"
+                style={{
+                  marginBottom: "30px",
+                  padding: "20px",
+                }}
+              >
+                <h2>Trade Any Stock</h2>
 
+                <p
+                  style={{
+                    opacity: 0.7,
+                    marginBottom: "16px",
+                  }}
+                >
+                  Buy or sell any Indian stock manually
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* STOCK SELECT */}
+                  <select
+                    value={selectedStock}
+                    onChange={(e) =>
+                      setSelectedStock(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      padding: "10px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    {availableStocks.map(
+                      (stock) => (
+                        <option
+                          key={stock.ticker}
+                          value={stock.ticker}
+                        >
+                          {stock.company} (
+                          {stock.ticker})
+                        </option>
+                      )
+                    )}
+                  </select>
+
+                  {/* QUANTITY */}
+                  <input
+                    type="number"
+                    min="1"
+                    value={manualQuantity}
+                    onChange={(e) =>
+                      setManualQuantity(
+                        Number(e.target.value)
+                      )
+                    }
+                    style={{
+                      width: "100px",
+                      padding: "10px",
+                      borderRadius: "8px",
+                    }}
+                  />
+
+                  {/* BUY */}
+                  <button
+                    className="buy-btn"
+                    onClick={() =>
+                      handleBuy(
+                        selectedStock,
+                        manualQuantity
+                      )
+                    }
+                  >
+                    Buy Stock
+                  </button>
+
+                  {/* SELL */}   
+                  <button
+                    className="sell-btn"
+                    onClick={() =>
+                      handleSell(
+                        selectedStock,
+                        manualQuantity
+                      )
+                    }
+                  >
+                    Sell Stock
+                  </button>
+                </div>
+              </div>
+        
               {/* ===== AI NEWS ===== */}
               <h2
                 style={{
-                  marginTop:
-                    "30px",
+                  marginTop: "30px",
                 }}
               >
                 AI News Trading
               </h2>
-
+              
               <div className="ai-news-section">
 
                 {loading ? (
@@ -1170,7 +1349,7 @@ export function TradePage() {
                   </p>
                 ) : (
                   news
-                    .slice(0, 5)
+                    .slice(0, 20)
                     .map(
                       (
                         item,
@@ -1325,7 +1504,7 @@ export function TradePage() {
                             <input
                               type="number"
                               min="1"
-                              value={Quantity[item._id] || 1}
+                              value={quantity[item._id] || 1}
                               onChange={(e) =>
                                 setQuantity((prev) => ({
                                   ...prev,
@@ -1626,7 +1805,7 @@ export function TradePage() {
                   >
                     {holdingsData.map(
                       (
-                        entry,
+                        _,
                         index
                       ) => (
                         <Cell
@@ -1802,7 +1981,7 @@ export function TradePage() {
 
                             <strong>
                               {
-                                order.time
+                                order.time || (order.createdAt ? new Date(order.createdAt).toLocaleTimeString(): "--")
                               }
                             </strong>
                           </div>
@@ -1878,13 +2057,7 @@ export function TradePage() {
                         invested;
 
                       const pnlPercent =
-                        (
-                          (pnl /
-                            invested) *
-                          100
-                        ).toFixed(
-                          2
-                        );
+                        invested > 0 ? ((pnl/invested) * 100).toFixed(2): "0.00";
 
                       return (
                         <div
