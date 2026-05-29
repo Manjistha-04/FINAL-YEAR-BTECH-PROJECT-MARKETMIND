@@ -15,9 +15,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const API_BASE = "http://localhost:5000/api";
-
-/* 🔗 CENTRAL DATA */
+const API_BASE = import.meta.env.VITE_API_URL;
+  /* 🔗 CENTRAL DATA */
 import {
   MARKET_DATA,
   STOCKS,

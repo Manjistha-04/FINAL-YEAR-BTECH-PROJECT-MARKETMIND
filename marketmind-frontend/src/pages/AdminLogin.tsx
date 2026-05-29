@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://marketmind-backend-1k2a.onrender.com/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();

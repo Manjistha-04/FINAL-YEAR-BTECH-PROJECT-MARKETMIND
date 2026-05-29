@@ -16,7 +16,7 @@ import { AdminRoute } from "./components/AdminRoute";
 function App() {
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/test")
+    fetch("https://marketmind-backend-1k2a.onrender.com/api/test")
       .then((res) => res.json())
       .then((data) => {
         console.log("Backend Response:", data);

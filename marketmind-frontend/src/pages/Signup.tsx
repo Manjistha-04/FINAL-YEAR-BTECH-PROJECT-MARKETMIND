@@ -22,7 +22,7 @@ export default function Signup() {
       setSuccess("");
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+        "https://marketmind-backend-1k2a.onrender.com//api/auth/register",
         {
           method: "POST",
           headers: {
