@@ -34,6 +34,7 @@ const COMPANY_TICKER_MAP = {
   "Adani Enterprises": "ADANIENT",
 
   "Adani Ports": "ADANIPORTS",
+  "CENTRAL BANK OF INDIA": "CENTRALBK"
 };
 
 module.exports = COMPANY_TICKER_MAP;

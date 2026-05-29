@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes"); // ✅ FIXED
 const adminRoutes = require("./routes/adminRoutes");
 const tradeRoutes = require("./routes/tradeRoutes");
 const holdingRoutes = require("./routes/holdingRoutes");
+const portfolioRoutes = require("./routes/portfolioRoutes");
 
 const app = express();
 
@@ -29,6 +30,9 @@ app.use("/api/trades", tradeRoutes);
 // admin
 app.use("/api/admin", adminRoutes);
 app.use("/api/holdings", holdingRoutes);
+
+// portfolio
+app.use("/api/portfolio", portfolioRoutes);
 
 // TEST ROUTES
 app.get("/", (req, res) => {
