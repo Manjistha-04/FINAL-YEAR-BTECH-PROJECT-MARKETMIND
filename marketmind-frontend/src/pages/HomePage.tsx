@@ -1,6 +1,6 @@
 import bgVideo from "../assets/Simple_Attractive_Video_Design.mp4";
 import "./HomePage.css";
-import logo from "../assets/logo.png";
+import logo from "../assets/Logo.png";
 import { useEffect, useRef, useState } from "react";
 import { SentimentBar } from "../components/SentimentBar";
 import { Footer } from "../components/Footer";
