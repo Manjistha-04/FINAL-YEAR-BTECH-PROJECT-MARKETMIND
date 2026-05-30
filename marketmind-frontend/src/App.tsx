@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import { API_BASE } from "./lib/api";
 
 import { StockTicker } from "./components/StockTicker";
 import { HomePage } from "./pages/HomePage";
@@ -16,7 +17,7 @@ import { AdminRoute } from "./components/AdminRoute";
 function App() {
 
   useEffect(() => {
-    fetch("https://marketmind-backend-1k2a.onrender.com/api/test")
+    fetch(`${API_BASE}/test`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Backend Response:", data);

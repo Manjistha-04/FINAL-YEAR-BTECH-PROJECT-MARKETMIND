@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { API_BASE } from "../lib/api";
 import bgVideo from "../assets/Simple_Attractive_Video_Design.mp4";
 import "./AuthSplit.css";
 
@@ -22,7 +23,7 @@ export default function Signup() {
       setSuccess("");
 
       const response = await fetch(
-        "https://marketmind-backend-1k2a.onrender.com/api/auth/register",
+        `${API_BASE}/auth/register`,
         {
           method: "POST",
           headers: {

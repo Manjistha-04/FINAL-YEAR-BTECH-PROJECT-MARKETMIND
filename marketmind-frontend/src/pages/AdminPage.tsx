@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const API_BASE = "https://marketmind-backend-1k2a.onrender.com/api";
+import { API_BASE } from "../lib/api";
 
 export function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
