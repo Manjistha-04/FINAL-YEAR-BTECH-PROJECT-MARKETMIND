@@ -828,29 +828,34 @@ export function TradePage() {
       {/* ===== LIVE TICKER ===== */}
       <div className="trade-ticker">
         {INDICES.map((idx) => {
-          const d =
-            marketData[idx];
+  const d = marketData[idx];
 
-          return (
-            <span key={idx}>
-              {idx}{" "}
-              {d.price.toFixed(2)}{" "}
-              <span
-                className={
-                  d.change >= 0
-                    ? "bull"
-                    : "bear"
-                }
-              >
-                {d.change >= 0
-                  ? "▲"
-                  : "▼"}{" "}
-                {Math.abs(d.change)}
-                %
-              </span>
-            </span>
-          );
-        })}
+  return (
+    <div
+      key={idx}
+      className={`watch-item ${
+        d.change >= 0
+          ? "up"
+          : "down"
+      }`}
+      onClick={() =>
+        navigate(`/chart/${idx}`)
+      }
+      style={{
+        cursor: "pointer",
+      }}
+    >
+      <span>{idx}</span>
+
+      <small>
+        {d.price.toFixed(2)}{" "}
+        {d.change >= 0
+          ? "▲"
+          : "▼"}
+      </small>
+    </div>
+  );
+})}
       </div>
 
       {/* ===== NAVBAR ===== */}
@@ -1041,7 +1046,14 @@ export function TradePage() {
                   d.change >= 0
                     ? "up"
                     : "down"
+
                 }`}
+                onClick={() =>
+                  navigate(`/chart/${idx}`)
+                }
+                style={{
+                  cursor: "pointer",
+                }}
               >
                 <span>{idx}</span>
 

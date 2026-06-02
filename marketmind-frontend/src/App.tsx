@@ -6,7 +6,7 @@ import { HomePage } from "./pages/HomePage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { TradePage } from "./pages/TradePage";
-import { ChartPage } from "./pages/ChartPage";
+import ChartPage from "./pages/ChartPage";
 import { ProtectedRoute } from "./pages/ProtectedRoute";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";

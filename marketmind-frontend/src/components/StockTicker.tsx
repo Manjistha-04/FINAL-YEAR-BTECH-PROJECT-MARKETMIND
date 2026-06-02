@@ -1,18 +1,18 @@
 import "./StockTicker.css";
 
 const stocks = [
-  { name: "NIFTY 50", price: 25818.55, change: "-0.16%" },
-  { name: "NIFYT BANK", price: 58926.75, change: "-0.18%" },
-  { name: "SENSEX", price: 84559.65, change: "-0.14%" },
-  { name: "RELIANCE", price: 1544.40, change: "+0.14%" },
-  { name: "TATASTEEL", price: 170.34, change: "+0.30%" },
-  { name: "HDFCBANK", price: 984.00, change: "-1.03%" },
-  { name: "JIOFIN", price: 293.15, change: "-0.71%" },
-  { name: "TMPV", price: 346.35, change: "+0.26%" },
-  { name: "TMCV", price: 386.90, change: "-0.11%" },
-  { name: "ADANIGREEN", price: 1021.25, change: "-0.68%" },
-  { name: "ADANIPORTS", price: 1486.30, change: "-0.84%" },
-  { name: "ADANIPOWER", price: 143.15, change: "-1.47%" },
+ { name: "NIFTY 50", price: 23483.55, change: "+0.43%" },
+  { name: "NIFTY BANK", price: 53714.65, change: "+0.13%" },
+  { name: "SENSEX", price: 74649.84, change: "+0.52%" },
+  { name: "RELIANCE", price: 1314.60, change: "-0.40%" },
+  { name: "TATASTEEL", price: 210.60, change: "+0.01%" },
+  { name: "HDFCBANK", price: 748.25, change: "+0.74%" },
+  { name: "JIOFIN", price: 237.64, change: "+1.14%" },
+  { name: "TMPV", price: 390.20, change: "+1.37%" },
+  { name: "TMCV", price: 370.55, change: "-0.98%" },
+  { name: "ADANIGREEN", price: 1449.40, change: "+0.17%" },
+  { name: "ADANIPORTS", price: 1814.50, change: "+1.73%" },
+  { name: "ADANIPOWER", price: 235.93, change: "+1.56%" },
 ];
 
 export function StockTicker() {

@@ -1,27 +1,61 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import "./ChartPage.css";
 
-export function ChartPage() {
+export default function ChartPage() {
   const { symbol } = useParams();
-  const navigate = useNavigate();
+
+  const getTradingViewSymbol = (
+    sym?: string
+  ) => {
+    switch (sym) {
+      case "NIFTY50":
+        return "NSE:NIFTY";
+
+      case "NIFTYBANK":
+        return "NSE:BANKNIFTY";
+
+      case "SENSEX":
+        return "BSE:SENSEX";
+
+      case "RELIANCE":
+        return "NSE:RELIANCE";
+
+      case "TCS":
+        return "NSE:TCS";
+
+      case "INFY":
+        return "NSE:INFY";
+
+      case "HDFCBANK":
+        return "NSE:HDFCBANK";
+
+      case "ICICIBANK":
+        return "NSE:ICICIBANK";
+
+      default:
+        return "NSE:NIFTY";
+    }
+  };
 
   return (
-    <div className="chart-root">
-      <header className="chart-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          &lt;
-        </button>
-        <h2>{symbol} Chart</h2>
-      </header>
+    <div className="chart-page">
+      <div className="chart-header">
+        <h1>
+          {symbol} Live Chart
+        </h1>
+      </div>
 
       <div className="chart-container">
-        {/* Placeholder (TradingView / Chart lib later) */}
-        <div className="chart-box">
-          <p>
-            📈 Live chart for <strong>{symbol}</strong>
-          </p>
-          <p>TradingView / API integration coming soon</p>
-        </div>
+        <AdvancedRealTimeChart
+          symbol={getTradingViewSymbol(
+            symbol
+          )}
+          theme="dark"
+          locale="en"
+          autosize
+          interval="15"
+        />
       </div>
     </div>
   );
